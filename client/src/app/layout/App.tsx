@@ -1,22 +1,16 @@
-import { Box, Container, CssBaseline } from '@mui/material';
-import axios from 'axios';
-import { useState, useEffect } from 'react';
+import { Box, Container, CssBaseline, Typography } from '@mui/material';
+import { useState } from 'react';
 import NavBar from './NavBar';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
+import { useActivities } from '../../lib/hooks/useActivities';
 
 function App() {
-  const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<Activity | undefined>(undefined);
   const [editMode, setEditMode] = useState(false);
-
-  useEffect(() => {
-    axios.get<Activity[]>('https://localhost:5001/api/activities')
-      .then(response => response.data)
-      .then(data => setActivities(data));
-  }, []);
+  const { activities, isPending } = useActivities();
 
   const handleSelectActivity = (id: string) => {
-    setSelectedActivity(activities.find(x => x.id === id));
+    setSelectedActivity(activities!.find(x => x.id === id));
   };
 
   const handleCancelSelectActivity = () => {    
@@ -33,39 +27,26 @@ function App() {
     setEditMode(false);
   };
 
-  const handleSubmitForm  = (activity: Activity) => {
-    if (activity.id) {
-      setActivities([...activities.filter(x => x.id !== activity.id), activity]);
-      setSelectedActivity(activity);
-    } else {
-      activity.id = crypto.randomUUID();
-      setActivities([...activities, activity]);
-      setSelectedActivity(activity);
-    }
-    setEditMode(false);
-  };
-
-  const handleDelete = (id: string) => {
-    setActivities(activities.filter(x => x.id !== id));
-    setSelectedActivity(undefined);
-  };
-
   return (
-    <Box sx={{ bgcolor: '#eeeeee' }}>
+    <Box sx={{ bgcolor: '#eeeeee', minHeight: '100vh' }}>
       <CssBaseline />
       <NavBar openForm={handleFormOpen} />
       <Container maxWidth="xl" sx={{ mt: 3 }}>
-        <ActivityDashboard 
-          activities={activities} 
-          selectActivity={handleSelectActivity}
-          cancelSelectActivity={handleCancelSelectActivity}
-          selectedActivity={selectedActivity}
-          editMode={editMode}
-          openForm={handleFormOpen}
-          closeForm={handleFormClose}
-          submitForm={handleSubmitForm}
-          deleteActivity={handleDelete}
-        />
+        {!activities || isPending ? 
+        (
+          <Typography >Loading activities...</Typography>
+        ) :
+        ( 
+          <ActivityDashboard 
+            activities={activities} 
+            selectActivity={handleSelectActivity}
+            cancelSelectActivity={handleCancelSelectActivity}
+            selectedActivity={selectedActivity}
+            editMode={editMode}
+            openForm={handleFormOpen}
+            closeForm={handleFormClose}
+          />
+        )}
       </Container>  
     </Box>
 );
