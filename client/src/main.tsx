@@ -6,8 +6,9 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import App from './app/layout/App.tsx';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { RouterProvider } from 'react-router/internal/react-server-client';
+import { router } from './app/router/Routes';
 
 function createRoot(element: HTMLElement): Root {
   return reactCreateRoot(element);
@@ -19,7 +20,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools />
-      <App />
+      <RouterProvider router={router} />
     </QueryClientProvider>
   </StrictMode>,
 )
