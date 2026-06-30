@@ -20,8 +20,8 @@ export default function ActivityForm() {
     });
 
     if (activity) {
-      data.id = activity.id;
-      await updateActivity.mutateAsync(data as unknown as Activity);
+      const updatedActivity = { ...activity, ...data, id: activity.id };
+      await updateActivity.mutateAsync(updatedActivity as Activity);
       navigate(`/activities/${activity.id}`);
     } else {
       createActivity.mutate(data as unknown as Activity, {
