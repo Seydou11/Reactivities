@@ -5,11 +5,13 @@ using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Application.Activities.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
 public class ActivitiesController : BaseApiController
 {
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<List<Activity>>> GetActivities()
     {
@@ -17,11 +19,7 @@ public class ActivitiesController : BaseApiController
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Activity>> GetActivityDetail(string id)
-    {
-        return HandleResult(await Mediator.Send(new GetActivityDetails.Query { Id = id }));
-        
-    }
+    public async Task<ActionResult<Activity>> GetActivityDetail(string id) => HandleResult(await Mediator.Send(new GetActivityDetails.Query { Id = id }));
 
     [HttpPost]
     public async Task<ActionResult<string>> CreateActivity(CreateActivityDto activityDto)
