@@ -1,6 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import agent from "./agent";
 import { useLocation } from "react-router";
+import type { Activity } from "../types";
+import agent from "./agent";
+
+type NewActivity = Omit<
+  Activity,
+  "id" | "isCancelled" | "city" | "latitude" | "longitude"
+> & {
+  city?: string;
+  latitude?: number;
+  longitude?: number;
+};
 
 export const useActivities = (id?: string) => {
   const queryClient = useQueryClient();
@@ -12,31 +22,31 @@ export const useActivities = (id?: string) => {
       const response = await agent.get<Activity[]>("/activities");
       return response.data;
     },
-    enabled: !id && location.pathname === '/activities'
+    enabled: !id && location.pathname === "/activities",
   });
 
-  const {data: activity, isLoading: isLoadingActivity} = useQuery({
-    queryKey: ['activities', id],
+  const { data: activity, isLoading: isLoadingActivity } = useQuery({
+    queryKey: ["activities", id],
     queryFn: async () => {
-      const response = await agent.get<Activity>(`/activities/${id}`)
+      const response = await agent.get<Activity>(`/activities/${id}`);
       return response.data;
     },
-    enabled: !!id
-  })
+    enabled: !!id,
+  });
 
   const updateActivity = useMutation({
     mutationFn: async (activity: Activity) => {
       await agent.put("/activities", activity);
     },
     onSuccess: async () => {
-      // Invalidate and refetch
       await queryClient.invalidateQueries({
         queryKey: ["activities"],
       });
     },
   });
+
   const createActivity = useMutation({
-    mutationFn: async (activity: Activity) => {
+    mutationFn: async (activity: NewActivity) => {
       const response = await agent.post("/activities", activity);
       return response.data;
     },
@@ -46,6 +56,7 @@ export const useActivities = (id?: string) => {
       });
     },
   });
+
   const deleteActivity = useMutation({
     mutationFn: async (id: string) => {
       await agent.delete(`/activities/${id}`);
@@ -64,6 +75,6 @@ export const useActivities = (id?: string) => {
     createActivity,
     deleteActivity,
     activity,
-    isLoadingActivity
+    isLoadingActivity,
   };
 };

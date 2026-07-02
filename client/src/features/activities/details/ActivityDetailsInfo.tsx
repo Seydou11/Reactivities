@@ -1,41 +1,63 @@
 import { CalendarToday, Info, Place } from "@mui/icons-material";
-import { Divider, Grid, Paper, Typography } from "@mui/material";
+import { Box, Button, Divider, Paper, Typography } from "@mui/material";
+import { useState } from "react";
+import MapComponent from "../../../app/shared/components/MapComponent";
+import type { Activity } from "../../../lib/types";
 import { formatDate } from "../../../lib/util/util";
 
 type Props = {
-    activity: Activity;
-}
+  activity: Activity;
+};
 
-export default function ActivityDetailsInfo({activity}:Props) {
+export default function ActivityDetailsInfo({ activity }: Props) {
+  const [mapOpen, setMapOpen] = useState(true);
+  const location = [activity.venue, activity.city].filter(Boolean).join(", ");
+  const rowSx = {
+    display: "grid",
+    gridTemplateColumns: "72px minmax(0, 1fr)",
+    alignItems: "center",
+    columnGap: 3,
+    px: 2,
+    py: 2,
+  };
+
   return (
-    <Paper sx={{ mb: 2 }}>
-      <Grid container sx={{alignItems:"center", pl:2, py:1}}>
-        <Grid sx={{xs:1, item:1}}>
-          <Info color="info" fontSize="large" />
-        </Grid>
-        <Grid sx={{item:1, xs:11}}>
-          <Typography>{activity.description}</Typography>
-        </Grid>
-      </Grid>
+    <Paper sx={{ mb: 2, overflow: "hidden" }}>
+      <Box sx={rowSx}>
+        <Info color="info" fontSize="large" />
+        <Typography>{activity.description}</Typography>
+      </Box>
       <Divider />
-      <Grid container sx={{alignItems:"center", pl:2, py:1}}>
-        <Grid sx={{item:1, xs:1}}>
-          <CalendarToday color="info" fontSize="large" />
-        </Grid>
-        <Grid sx={{item:1, xs:11}}>
-          <Typography>{formatDate(activity.date)}</Typography>
-        </Grid>
-      </Grid>
+      <Box sx={rowSx}>
+        <CalendarToday color="info" fontSize="large" />
+        <Typography>{formatDate(activity.date)}</Typography>
+      </Box>
       <Divider />
-
-      <Grid container sx={{alignItems:"center", pl:2, py:1}}>
-        <Grid sx={{item:1, xs:1}}>
-          <Place color="info" fontSize="large" />
-        </Grid>
-        <Grid sx={{item:1, xs:11}}>
-          <Typography>{activity.venue}, {activity.city}</Typography>
-        </Grid>
-      </Grid>
+      <Box sx={rowSx}>
+        <Place color="info" fontSize="large" />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            minWidth: 0,
+          }}
+        >
+          <Typography sx={{ minWidth: 0 }}>{location}</Typography>
+          <Button onClick={() => setMapOpen(!mapOpen)} sx={{ flexShrink: 0 }}>
+            {mapOpen ? "Hide Map" : "Show Map"}
+          </Button>
+        </Box>
+      </Box>
+      {mapOpen && (
+        <Box sx={{ height: 400, width: "100%" }}>
+          <MapComponent
+            position={[activity.latitude, activity.longitude]}
+            venue={activity.venue}
+          />
+        </Box>
+      )}
     </Paper>
   );
 }
