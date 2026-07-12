@@ -10,7 +10,7 @@ type Props = {
 };
 
 export default function ActivityDetailsInfo({ activity }: Props) {
-  const [mapOpen, setMapOpen] = useState(true);
+  const [mapOpen, setMapOpen] = useState(false);
   const location = [activity.venue, activity.city].filter(Boolean).join(", ");
   const rowSx = {
     display: "grid",
@@ -45,13 +45,13 @@ export default function ActivityDetailsInfo({ activity }: Props) {
           }}
         >
           <Typography sx={{ minWidth: 0 }}>{location}</Typography>
-          <Button onClick={() => setMapOpen(!mapOpen)} sx={{ flexShrink: 0 }}>
+          <Button onClick={() => setMapOpen(!mapOpen)} sx={{ flexShrink: 0, whiteSpace: 'nowrap', mx:2 }}>
             {mapOpen ? "Hide Map" : "Show Map"}
           </Button>
         </Box>
       </Box>
       {mapOpen && (
-        <Box sx={{ height: 400, width: "100%" }}>
+        <Box sx={{ height: 400, zIndex: 1000, width: "100%", display: 'block' }}>
           <MapComponent
             position={[activity.latitude, activity.longitude]}
             venue={activity.venue}
