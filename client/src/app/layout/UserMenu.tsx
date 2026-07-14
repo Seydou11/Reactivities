@@ -13,27 +13,44 @@ import { Person } from '@mui/icons-material';
 
 export default function UserMenu() {
   const {currentUser, logoutUser} = useAccount();
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
   const id = React.useId();
   const buttonId = `${id}-button`;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // MUI hides the application root while the menu is mounted. Removing the
+    // focus first prevents Chrome from finding a focused element inside the
+    // root at the exact moment aria-hidden is applied.
+    event.currentTarget.blur();
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
+    // During its exit transition, MUI sets aria-hidden on the menu. Make sure
+    // no menu item keeps focus while that happens, then restore focus to the
+    // trigger after React has started unmounting the menu.
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     setAnchorEl(null);
+    requestAnimationFrame(() => buttonRef.current?.focus());
   };
 
   return (
     <>
       <Button
+        ref={buttonRef}
+        id={buttonId}
         onClick={handleClick}
         sx={{ color: 'inherit', fontSize: '1.1rem', size: 'large' }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Avatar />
+          <Avatar 
+            src={currentUser?.imageUrl}
+            alt='current user image'
+          />
             {currentUser?.displayName}
         </Box>
       </Button>
@@ -53,7 +70,7 @@ export default function UserMenu() {
             </ListItemIcon>
             <ListItemText>Create Activity</ListItemText>
         </MenuItem>
-        <MenuItem component={Link} to="/profile" onClick={handleClose}>
+        <MenuItem component={Link} to={`/profiles/${currentUser?.id}`} onClick={handleClose}>
             <ListItemIcon>
                 <Person />
             </ListItemIcon>
